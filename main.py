@@ -183,6 +183,8 @@ if __name__ == '__main__':
 
 
     model_ft = models.resnet18(pretrained=True)
+    torch.save(model_ft, "resnet18.pt")
+    model_ft = torch.load("resnet18.pt")
     num_ftrs = model_ft.fc.in_features
     # Here the size of each output sample is set to 2.
     # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
