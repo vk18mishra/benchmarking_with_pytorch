@@ -4,6 +4,7 @@
 from __future__ import print_function, division
 
 import torch
+from memory_profiler import profile
 import io
 import pprofile
 import cProfile, pstats, sys
@@ -22,24 +23,25 @@ import time
 import os
 import copy
 
-def imshow(inp, title=None):
-    """Imshow for Tensor."""
-    inp = inp.numpy().transpose((1, 2, 0))
-    mean = np.array([0.485, 0.456, 0.406])
-    std = np.array([0.229, 0.224, 0.225])
-    inp = std * inp + mean
-    inp = np.clip(inp, 0, 1)
-    plt.imshow(inp)
-    if title is not None:
-        plt.title(title)
-    plt.pause(0.001)  # pause a bit so that plots are updated
+# def imshow(inp, title=None):
+#     """Imshow for Tensor."""
+#     inp = inp.numpy().transpose((1, 2, 0))
+#     mean = np.array([0.485, 0.456, 0.406])
+#     std = np.array([0.229, 0.224, 0.225])
+#     inp = std * inp + mean
+#     inp = np.clip(inp, 0, 1)
+#     plt.imshow(inp)
+#     if title is not None:
+#         plt.title(title)
+#     plt.pause(0.001)  # pause a bit so that plots are updated
 
 # pyRAPL.setup()
 
 # csv_output = pyRAPL.outputs.CSVOutput('energy_pyRAPL.csv')
 
 # @pyRAPL.measure(output=csv_output)
-def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
+@profile(precision=3)
+def train_model(model, criterion, optimizer, scheduler, num_epochs=1):
     since = time.time()
 
     best_model_wts = copy.deepcopy(model.state_dict())
@@ -107,31 +109,31 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
     model.load_state_dict(best_model_wts)
     return model
 
-def visualize_model(model, num_images=6):
-    was_training = model.training
-    model.eval()
-    images_so_far = 0
-    fig = plt.figure()
-
-    with torch.no_grad():
-        for i, (inputs, labels) in enumerate(dataloaders['val']):
-            inputs = inputs.to(device)
-            labels = labels.to(device)
-
-            outputs = model(inputs)
-            _, preds = torch.max(outputs, 1)
-
-            for j in range(inputs.size()[0]):
-                images_so_far += 1
-                ax = plt.subplot(num_images//2, 2, images_so_far)
-                ax.axis('off')
-                ax.set_title('predicted: {}'.format(class_names[preds[j]]))
-                imshow(inputs.cpu().data[j])
-
-                if images_so_far == num_images:
-                    model.train(mode=was_training)
-                    return
-        model.train(mode=was_training)
+# def visualize_model(model, num_images=6):
+#     was_training = model.training
+#     model.eval()
+#     images_so_far = 0
+#     fig = plt.figure()
+#
+#     with torch.no_grad():
+#         for i, (inputs, labels) in enumerate(dataloaders['val']):
+#             inputs = inputs.to(device)
+#             labels = labels.to(device)
+#
+#             outputs = model(inputs)
+#             _, preds = torch.max(outputs, 1)
+#
+#             for j in range(inputs.size()[0]):
+#                 images_so_far += 1
+#                 ax = plt.subplot(num_images//2, 2, images_so_far)
+#                 ax.axis('off')
+#                 ax.set_title('predicted: {}'.format(class_names[preds[j]]))
+#                 # imshow(inputs.cpu().data[j])
+#
+#                 if images_so_far == num_images:
+#                     model.train(mode=was_training)
+#                     return
+#         model.train(mode=was_training)
 
 if __name__ == '__main__':
 
@@ -176,7 +178,7 @@ if __name__ == '__main__':
     # Make a grid from batch
     out = torchvision.utils.make_grid(inputs)
 
-    imshow(out, title=[class_names[x] for x in classes])
+    # imshow(out, title=[class_names[x] for x in classes])
 
 
 
@@ -208,15 +210,22 @@ if __name__ == '__main__':
     # you can calculate percentage of available memory
     mem_av_per_b = psutil.virtual_memory().available * 100 / psutil.virtual_memory().total
 
+
     profiler = pprofile.Profile()
     pr = cProfile.Profile()
     pr.enable()
-
+    start_train = time.time()
     with profiler:
         model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                           num_epochs=3)
+                           num_epochs=1)
         # csv_output.save()
+    end_train = time.time()
     pr.disable()
+    elapsed_time = end_train-start_train
+    with open('Elapsed_time.txt', 'w') as f1:
+        f1.write("Training Time(Elapsed):")
+        f1.write(str(elapsed_time))
+    f1.close()
     # gives a single float value
     # profiler.print_stats()
     # Or to a file:
@@ -293,4 +302,4 @@ if __name__ == '__main__':
     # Preview the first 5 lines of the loaded data
     # data_cpu.head()
 
-    visualize_model(model_ft)
+    # visualize_model(model_ft)
