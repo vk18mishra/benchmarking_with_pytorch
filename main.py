@@ -34,11 +34,11 @@ def imshow(inp, title=None):
         plt.title(title)
     plt.pause(0.001)  # pause a bit so that plots are updated
 
-# pyRAPL.setup()
+pyRAPL.setup()
 
-# csv_output = pyRAPL.outputs.CSVOutput('energy_pyRAPL.csv')
+csv_output = pyRAPL.outputs.CSVOutput('energy_pyRAPL.csv')
 
-# @pyRAPL.measure(output=csv_output)
+@pyRAPL.measure(output=csv_output)
 def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
     since = time.time()
 
@@ -215,7 +215,7 @@ if __name__ == '__main__':
     with profiler:
         model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
                            num_epochs=3)
-        # csv_output.save()
+        csv_output.save()
     pr.disable()
     # gives a single float value
     # profiler.print_stats()
