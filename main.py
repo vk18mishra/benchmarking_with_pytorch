@@ -1,8 +1,11 @@
+# Source: https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html
+# --WITH CHANGES
+
 # License: BSD
 # Author: Sasank Chilamkurthy
 
 from __future__ import print_function, division
-
+import realtime_monitoring
 import torch
 from memory_profiler import profile
 import io
@@ -48,6 +51,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=1):
     best_acc = 0.0
 
     for epoch in range(num_epochs):
+        # s = realtime_monitoring.intermediate()
         print('Epoch {}/{}'.format(epoch, num_epochs - 1))
         print('-' * 10)
 
